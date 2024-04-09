@@ -1,5 +1,6 @@
 package dev.stas.instagramcard.ui
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,11 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,16 +30,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Devices.TABLET
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.stas.instagramcard.ManViewModel
 import dev.stas.instagramcard.R
-import dev.stas.instagramcard.ui.theme.InstagramCardTheme
 
 @Composable
-fun InstagramProfileCard() {
+fun InstagramProfileCard(
+    viewModel: ManViewModel
+) {
+    Log.d("StasStas", "InstagramProfileCard")
+    val isFollowed : State<Boolean> = viewModel.isFollowed.observeAsState(initial = false)
     Card(
         modifier = Modifier
             .padding(8.dp),
@@ -47,6 +52,7 @@ fun InstagramProfileCard() {
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground)
     ) {
+        Log.d("StasStas", "Card")
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier
@@ -68,8 +74,7 @@ fun InstagramProfileCard() {
                 UserStatistics(title = "Followers", value = "436M")
                 UserStatistics(title = "Following", value = "76")
             }
-            Column(
-            ) {
+            Column {
                 Text(
                     text = "Instagram",
                     fontSize = 36.sp,
@@ -80,18 +85,42 @@ fun InstagramProfileCard() {
                     fontSize = 14.sp,
                 )
                 Text(
-                    text = "www.facebook.com/ololo",
+                    text = "www.facebook.com/boo",
                     fontSize = 14.sp,
                 )
-                Button(
-                    onClick = {},
-                    border = BorderStroke(1.dp, Color.Black)
-                ){
-                    Text(text = "Follow")
+                FollowButton(isFollowed){
+                    viewModel.changeFollowingStatus()
                 }
             }
-
         }
+    }
+}
+
+@Composable
+fun FollowButton(
+    isFollowed: State<Boolean>,
+    clickListener: () -> Unit
+) {
+    Log.d("StasStas", "FollowButton")
+    Button(
+        onClick = {
+            clickListener()
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isFollowed.value) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+            } else {
+                MaterialTheme.colorScheme.primary
+            }
+
+        )
+    ) {
+        val text = if (isFollowed.value) {
+            "Unfollow"
+        } else {
+            "Follow"
+        }
+        Text(text = text)
     }
 }
 
@@ -100,6 +129,7 @@ private fun UserStatistics(
     title: String,
     value: String
 ) {
+    Log.d("StasStas", "UserStatistics")
     Column(
         modifier = Modifier
             .height(80.dp),
@@ -115,25 +145,5 @@ private fun UserStatistics(
             text = title,
             fontWeight = FontWeight.Bold
         )
-    }
-}
-
-@Preview(name = "Tablet", device = Devices.PHONE, showSystemUi = true)
-@Composable
-fun PreviewCardLight() {
-    InstagramCardTheme(
-        darkTheme = false
-    ) {
-        InstagramProfileCard()
-    }
-}
-
-@Preview(name = "Tablet", device = TABLET, showSystemUi = true)
-@Composable
-fun PreviewCardDark() {
-    InstagramCardTheme(
-        darkTheme = true
-    ) {
-        InstagramProfileCard()
     }
 }
